@@ -1,19 +1,12 @@
-package com.api.prac.model;
+package com.project.api.notice.model;
 
-import com.api.common.Model.BaseTimeEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.api.common.Model.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 @Data
 @Table(name="NOTICE")
@@ -21,8 +14,8 @@ import java.time.LocalDateTime;
 public class Notice extends BaseTimeEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long seq;
 
     @NotNull(message = "제목은 빈 값일 수 없습니다.")
     @Size(min=1, max = 10, message = "제목은 1 글자 이상 30 글자 이하이어야 합니다.")
@@ -35,13 +28,17 @@ public class Notice extends BaseTimeEntity{
     private String sbst;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Column(name="CRETRID")
+    @Column(name="CRETR_ID")
     private String cretrId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Column(name="AMTID")
+    @Column(name="AMT_ID")
     private String amtId;
 
+    @Column(name = "ATC_FILE_SEQ")
+    private Long atcFileSeq;
+
+    //private List<MultipartFile> multipartFileList;
    /* @Column(name="CRETDT")
     private LocalDateTime cretDt;
 

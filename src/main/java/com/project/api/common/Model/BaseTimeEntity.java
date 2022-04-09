@@ -1,6 +1,5 @@
-package com.api.common.Model;
+package com.project.api.common.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,11 +18,11 @@ public class BaseTimeEntity {
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @CreatedDate
-        @Column(name="CRETDT")
+        @Column(name="CRET_DT")
         private LocalDateTime cretDt;
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        @Column(name="AMTDT")
+        @Column(name="AMT_DT")
         @LastModifiedDate
         private LocalDateTime amtDt;
 }

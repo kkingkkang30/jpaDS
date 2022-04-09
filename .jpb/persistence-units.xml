@@ -4,7 +4,7 @@
     <persistence-units>
       <persistence-unit name="Default">
         <packages>
-          <package value="com.api.prac" />
+          <package value="com.project.api" />
         </packages>
       </persistence-unit>
     </persistence-units>
