@@ -9,6 +9,8 @@ import com.project.api.notice.service.NoticeService;
 import com.project.api.util.FileUpload.model.UploadFileVO;
 import com.project.api.util.FileUpload.service.FileUploadUtil;
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,9 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -33,8 +38,13 @@ public class NoticeController {
     final int SHORT_ID_LENGTH = 8;
 
     @GetMapping("/notice")
-    public List<Notice> getAll(){
-        return noticeRepository.findAll();
+    public List<Notice> getAll(@RequestParam(name="title", required = false) String title){
+        if(title.isEmpty()){
+            return noticeRepository.findAll();
+        }
+       else{
+           return noticeRepository.findByTitle(title);
+        }
     }
 
     @GetMapping("/notice/{id}")
@@ -109,6 +119,52 @@ public class NoticeController {
         noticeRepository.deleteById(id);
     }
 
+    @PostMapping("/notice/excelDownload")
+    public void noticeListExcelorkbook(@RequestBody List<Notice> ntcList, HttpServletResponse response) throws Exception {
+
+        if(ntcList.size()>10000) throw new Exception();
+        ServletOutputStream outputStream = null;
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("sheet1");
+
+        Font headerFont = workbook.createFont();
+        headerFont.setBoldweight((short)1);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerFont.setColor(IndexedColors.BLUE_GREY.getIndex());
+
+        CellStyle headerCellStyle = workbook.createCellStyle();
+        headerCellStyle.setFont(headerFont);
+        Row headerRow = sheet.createRow(0);
+        String [] cellArray = {"번호","제목","작성자","작성일자"};
+
+        for(int i=0; i < cellArray.length; i++){
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(cellArray[i]);
+            cell.setCellStyle(headerCellStyle);
+        }
+        int rowNum = 1;
+        for(Notice vo : ntcList){
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(rowNum-1);
+            row.createCell(1).setCellValue(vo.getTitle());
+            row.createCell(2).setCellValue(vo.getCretrId());
+            //   row.createCell(3).setCellValue(String.valueOf(vo.getCretDt()));
+
+        }
+        for(int i=0; i < cellArray.length; i++){
+            sheet.autoSizeColumn(i);
+        }
+
+        String excelFileNm ="noticeList";
+        response.setHeader("Content-Transfer-Encoding", "binary;");
+        response.setHeader("Pragma", "no-cache;");
+        response.setHeader("Expires", "-1;");
+        response.setHeader("Content-Disposition", "attachment;filename=\"" +excelFileNm+ "\";");
+        response.setContentType("application/octet-stream;");
+        outputStream = ((ServletResponse)response).getOutputStream();
+        workbook.write(outputStream);
+    }
 
     public ResponseEntity<Message> throwErrorResponse(BindingResult bindingResult) {
 
