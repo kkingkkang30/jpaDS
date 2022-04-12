@@ -7,11 +7,12 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 @Data
 @Table(name="NOTICE")
 @Entity
-public class Notice extends BaseTimeEntity{
+public class Notice extends BaseTimeEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

@@ -1,17 +1,22 @@
 package com.project.api.notice.controller;
 
+import com.project.api.common.exception.ApiRuntimeException;
 import com.project.api.common.exception.Message;
 import com.project.api.common.exception.StatusEnum;
 
 import com.project.api.notice.model.Notice;
+import com.project.api.notice.model.NoticeFileDto;
 import com.project.api.notice.repository.NoticeRepository;
 import com.project.api.notice.service.NoticeService;
 import com.project.api.util.FileUpload.model.UploadFileVO;
 import com.project.api.util.FileUpload.service.FileUploadUtil;
-import lombok.AllArgsConstructor;
+import com.querydsl.core.Tuple;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,14 +33,18 @@ import java.util.List;
 import java.util.UUID;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NoticeController {
 
     private final NoticeRepository noticeRepository;
     private final NoticeService noticeService;
-    final int SHORT_ID_LENGTH = 8;
+
+
+    @Value("${image.path}")
+    private String pathNm;
 
     @GetMapping("/notice")
     public List<Notice> getAll(@RequestParam(name="title", required = false) String title){
@@ -48,9 +57,12 @@ public class NoticeController {
     }
 
     @GetMapping("/notice/{id}")
-    public Notice getNoticeDlt(@PathVariable Long id) {
-        return noticeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID 값 확인 : " + id));
+    public @ResponseBody
+    List<NoticeFileDto> getNoticeDlt(@PathVariable Long id) {
+        List<NoticeFileDto> notice = noticeService.findById(id);
+        return notice;
+        /*return noticeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID 값 확인 : " + id));*/
     }
 
     @PostMapping("/notice")
@@ -66,15 +78,15 @@ public class NoticeController {
                 Long fileSeq = noticeService.findNewSeq();
                 for(MultipartFile multipartFile : multipartFileList) {
                     String storeFileNm = UUID.randomUUID().toString();
-                    FileUploadUtil.uploadFile(multipartFile, "/Users/sujin/Desktop/fileTest", storeFileNm);
+                    FileUploadUtil.uploadFile(multipartFile, pathNm, storeFileNm);
 
                     UploadFileVO uploadFileVO = UploadFileVO.builder()
                             .fileSeq(fileSeq)
-                            .atcFilePathNm("")
+                            .atcFilePathNm(pathNm)
                             .storeFileNm(storeFileNm)
                             .atcFileSize(multipartFile.getSize())
                             .fileDtlSeq(dtl)
-                            .cretrId(ntc.getAmtId())
+                            .cretrId(ntc.getCretrId())
                             .originFileNm(multipartFile.getOriginalFilename())
                             .fileExtNm(multipartFile.getContentType())
                                     .build();
@@ -122,7 +134,7 @@ public class NoticeController {
     @PostMapping("/notice/excelDownload")
     public void noticeListExcelorkbook(@RequestBody List<Notice> ntcList, HttpServletResponse response) throws Exception {
 
-        if(ntcList.size()>10000) throw new Exception();
+        if(ntcList.size()>10000) throw new ApiRuntimeException(StatusEnum.OVER_MAX_RECORD.getCode(), StatusEnum.OVER_MAX_RECORD.getMsg());
         ServletOutputStream outputStream = null;
 
         Workbook workbook = new XSSFWorkbook();
@@ -136,7 +148,7 @@ public class NoticeController {
         CellStyle headerCellStyle = workbook.createCellStyle();
         headerCellStyle.setFont(headerFont);
         Row headerRow = sheet.createRow(0);
-        String [] cellArray = {"번호","제목","작성자","작성일자"};
+        String [] cellArray = {"번호","제목","작성자"};
 
         for(int i=0; i < cellArray.length; i++){
             Cell cell = headerRow.createCell(i);
