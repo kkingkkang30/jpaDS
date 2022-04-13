@@ -11,7 +11,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Repository
@@ -46,4 +47,32 @@ public class NoticeQueryRepository {
 
         return notice;
     }
+
+    public Map<String,Object> findTupleById(Long id){
+        QNotice qNotice = QNotice.notice;
+        QUploadFileVO qUploadFileVO = QUploadFileVO.uploadFileVO;
+
+        List<Tuple> notice = query
+                .select(qNotice.seq,qNotice.title,qNotice.sbst,qNotice.atcFileSeq,qUploadFileVO.fileDtlSeq)
+                .from(qNotice)
+                .where(qNotice.seq.eq(id))
+                .leftJoin(qUploadFileVO).on(qNotice.atcFileSeq.eq(qUploadFileVO.fileSeq))
+                .fetch();
+
+        HashMap<String,Object> returnNtc = new HashMap<>();
+        List<Long> fileDtlList = new ArrayList<>();
+        for (Tuple tuple : notice) {
+            fileDtlList.add(tuple.get(qUploadFileVO.fileDtlSeq));
+        }
+
+        returnNtc.put("ntcSeq",notice.get(0).get(qNotice.seq));
+        returnNtc.put("ntcTitle",notice.get(0).get(qNotice.title));
+        returnNtc.put("fileSeq",notice.get(0).get(qNotice.atcFileSeq));
+        returnNtc.put("fileDtlSeq",fileDtlList);
+
+        return returnNtc;
+    }
 }
+
+// 서브 쿼리
+// map으로 받기ㅂ

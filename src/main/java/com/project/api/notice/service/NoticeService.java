@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -39,6 +40,11 @@ public class NoticeService {
         List<NoticeFileDto> notice;
         notice = noticeQueryRepository.findById(id);
         return  notice;
+    }
+
+    public  Map<String, Object> findTupleById(Long id){
+        Map<String, Object> notice = noticeQueryRepository.findTupleById(id);
+        return notice;
     }
 }
 

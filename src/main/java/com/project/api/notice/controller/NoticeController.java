@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -64,6 +65,12 @@ public class NoticeController {
         return notice;
         /*return noticeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ID 값 확인 : " + id));*/
+    }
+
+    @GetMapping("/noticeTuple/{id}")
+    public Map<String, Object>  getNoticeTuple(@PathVariable Long id){
+        Map<String, Object>  notice = noticeService.findTupleById(id);
+        return notice;
     }
 
     @PostMapping("/notice")
