@@ -1,5 +1,6 @@
 package com.project.api.notice.repository;
 
+import com.project.api.notice.model.Notice;
 import com.project.api.notice.model.NoticeFileDto;
 import com.project.api.notice.model.QNotice;
 import com.project.api.util.FileUpload.model.QUploadFileVO;
@@ -21,6 +22,16 @@ public class NoticeQueryRepository {
 
     private final JPAQueryFactory query;
 
+    public List<Notice> findByTitle(String title){
+        QNotice qNotice = QNotice.notice;
+        List<Notice> notice = query
+                .select(qNotice)
+                .from(qNotice)
+                .where(qNotice.title.eq(title))
+                .fetch();
+
+        return notice;
+    }
     public List<NoticeFileDto> findById(Long id){
 
         QNotice qNotice = QNotice.notice;
@@ -33,7 +44,6 @@ public class NoticeQueryRepository {
                 .leftJoin(qUploadFileVO).on(qNotice.atcFileSeq.eq(qUploadFileVO.fileSeq))
                 .fetch();
 
-        System.out.println("@@"+ notice.get(0)+ notice.get(1));
         return notice;
     }
 }

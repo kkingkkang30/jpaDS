@@ -52,7 +52,8 @@ public class NoticeController {
             return noticeRepository.findAll();
         }
        else{
-           return noticeRepository.findByTitle(title);
+           return noticeService.findByTitle(title);
+            //return noticeRepository.findByTitle(title);
         }
     }
 
