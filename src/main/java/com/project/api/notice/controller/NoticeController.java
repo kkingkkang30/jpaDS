@@ -4,6 +4,7 @@ import com.project.api.common.exception.ApiRuntimeException;
 import com.project.api.common.exception.Message;
 import com.project.api.common.exception.StatusEnum;
 
+import com.project.api.common.log.CommonLog;
 import com.project.api.notice.model.Notice;
 import com.project.api.notice.model.NoticeFileDto;
 import com.project.api.notice.repository.NoticeRepository;
@@ -14,8 +15,10 @@ import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +45,7 @@ public class NoticeController {
 
     private final NoticeRepository noticeRepository;
     private final NoticeService noticeService;
-
+    //private final Logger logger = (Logger) LogManager.getLogger(CommonLog.class);
 
     @Value("${image.path}")
     private String pathNm;
@@ -184,6 +187,13 @@ public class NoticeController {
         response.setContentType("application/octet-stream;");
         outputStream = ((ServletResponse)response).getOutputStream();
         workbook.write(outputStream);
+    }
+
+
+    //서브쿼리 연습
+    @GetMapping("/notice/usingAtcFileNotice/{fileSeq}")
+    public List<Notice> getUsingAtcFileNoticeList(@PathVariable Long fileSeq){
+        return noticeService.getUsingAtcFileNoticeList(fileSeq);
     }
 
     public ResponseEntity<Message> throwErrorResponse(BindingResult bindingResult) {

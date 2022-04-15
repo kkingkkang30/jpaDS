@@ -6,6 +6,7 @@ import com.project.api.notice.model.QNotice;
 import com.project.api.util.FileUpload.model.QUploadFileVO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,20 @@ public class NoticeQueryRepository {
         returnNtc.put("fileDtlSeq",fileDtlList);
 
         return returnNtc;
+    }
+
+    public List<Notice> findNtcByFileSeq(Long fileSeq) {
+        QNotice qNotice = QNotice.notice;
+        QUploadFileVO qUploadFileVO = QUploadFileVO.uploadFileVO;
+        return query
+                .selectFrom(qNotice)
+                .where(qNotice.atcFileSeq.in(
+                        JPAExpressions
+                                .select(qUploadFileVO.fileSeq)
+                                .from(qUploadFileVO)
+                                .where(qUploadFileVO.fileSeq.eq(fileSeq))))
+                .fetch();
+
     }
 }
 

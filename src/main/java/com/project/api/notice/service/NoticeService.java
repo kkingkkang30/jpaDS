@@ -46,5 +46,9 @@ public class NoticeService {
         Map<String, Object> notice = noticeQueryRepository.findTupleById(id);
         return notice;
     }
+
+    public List<Notice> getUsingAtcFileNoticeList(Long fileSeq) {
+        return noticeQueryRepository.findNtcByFileSeq(fileSeq);
+    }
 }
 
